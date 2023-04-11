@@ -1,0 +1,43 @@
+name: package
+
+# Controls when the workflow will run
+on:
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  generate-debs:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-22.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v2
+      - name: Package debs
+        run: |
+          export version=$(curl -s https://api.github.com/repos/go-gitea/gitea/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")' | tr -d 'v')
+          export current=$(cat current.txt)
+          [ "$current" == "$version" ] && exit 0
+          rm -rf debs deb tmp
+          mkdir tmp && cd tmp
+          cp ../build-package .
+          cp -r ../DEBIAN .
+          chmod +x build-package
+          chmod 755 DEBIAN/control
+          chmod 755 DEBIAN/postinst
+          chmod 755 DEBIAN/postrm
+          chmod 755 DEBIAN/preinst
+          chmod 755 DEBIAN/prerm
+          bash build-package || exit 1
+          mv deb/*.deb ../
+          cd ..
+          rm -rf tmp
+          echo $version > current.txt
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add .
+          git commit -m "Upload gitea ${version}"
+          git push origin master
