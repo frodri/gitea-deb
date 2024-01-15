@@ -1,0 +1,2 @@
+-P ubuntu-22.04=catthehacker/ubuntu:gh-22.04
+--artifact-server-path ./artifacts
