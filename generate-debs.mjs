@@ -102,6 +102,7 @@ const main = async () => {
         );
         await binaryWriter;
         await exec('dpkg-deb --build tmp deb');
+        await rm('./tmp/usr/local/bin/gitea');
     }
 
     // Update the version number.
