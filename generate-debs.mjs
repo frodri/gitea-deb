@@ -30,22 +30,22 @@ const main = async () => {
     );
 
     const newFolders = [
-        "deb",
-        "tmp/usr/local/bin",
-        'tmp/etc/systemd/system',
-        "tmp/var/lib/gitea/custom",
-        "tmp/var/lib/gitea/data",
-        "tmp/var/lib/gitea/indexers",
-        "tmp/var/lib/gitea/public",
-        "tmp/var/lib/gitea/log",
+        "./deb",
+        "./tmp/usr/local/bin",
+        './tmp/etc/systemd/system',
+        "./tmp/var/lib/gitea/custom",
+        "./tmp/var/lib/gitea/data",
+        "./tmp/var/lib/gitea/indexers",
+        "./tmp/var/lib/gitea/public",
+        "./tmp/var/lib/gitea/log",
     ];
 
     let folderMkdirs = newFolders.map(
         (folder) => mkdir(folder, {recursive: true, mode: 0o750})
     )
     folderMkdirs.push(
-        mkdir('tmp/etc/gitea', {recursive: true, mode: 0o770}),
-        mkdir('tmp/DEBIAN', {recursive: true, mode: 0o755})
+        mkdir('./tmp/etc/gitea', {recursive: true, mode: 0o770}),
+        mkdir('./tmp/DEBIAN', {recursive: true, mode: 0o755})
     );
     await Promise.all(folderMkdirs);
 
@@ -57,13 +57,13 @@ const main = async () => {
     const serviceResponse = await serviceRequest;
     const serviceBuffer = Buffer.from(await serviceResponse.arrayBuffer());
     fileWrites.push(
-        writeFile('tmp/etc/systemd/system/gitea.service', serviceBuffer, {mode: 0x755})
+        writeFile('./tmp/etc/systemd/system/gitea.service', serviceBuffer, {mode: 0x755})
     );
     await Promise.all(fileWrites);
 
     // Fix file permissions for dpkg.
     const fileChmods =  DEBIANfiles.map(
-        (file) => chmod(`tmp/DEBIAN/${file}`, 0o755)
+        (file) => chmod(`./tmp/DEBIAN/${file}`, 0o755)
     );
     await Promise.all(fileChmods);
 
@@ -79,7 +79,7 @@ const main = async () => {
         const binaryResponse = await binaryRequest;
         const binaryBuffer = Buffer.from(await binaryResponse.arrayBuffer());
         const binaryWriter = writeFile(
-            'tmp/usr/local/bin/gitea',
+            './tmp/usr/local/bin/gitea',
             binaryBuffer,
             {mode: 0x755, flag: 'w'}
         );
